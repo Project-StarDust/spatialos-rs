@@ -1,4 +1,9 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Schema_AddBool, Schema_AddBytes, Schema_AddDouble, Schema_AddEntityId, Schema_AddEnum,
+    Schema_AddFixed32, Schema_AddFixed64, Schema_AddFloat, Schema_AddInt32, Schema_AddInt64,
+    Schema_AddObject, Schema_AddSfixed32, Schema_AddSfixed64, Schema_AddSint32, Schema_AddSint64,
+    Schema_AddUint32, Schema_AddUint64, Schema_Object,
+};
 
 use super::Object;
 use crate::schema::{EntityId, FieldId};

@@ -1,6 +1,10 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Worker_GaugeMetric, Worker_HistogramMetric, Worker_HistogramMetricBucket, Worker_Metrics,
+};
 
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
+
+use crate::{const_to_vector, vector_to_owned_array};
 
 #[derive(Debug)]
 pub struct HistogramMetricBucket {
@@ -17,11 +21,19 @@ impl From<Worker_HistogramMetricBucket> for HistogramMetricBucket {
     }
 }
 
+impl Into<Worker_HistogramMetricBucket> for HistogramMetricBucket {
+    fn into(self) -> Worker_HistogramMetricBucket {
+        Worker_HistogramMetricBucket {
+            upper_bound: self.upper_bound,
+            samples: self.samples,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct HistogramMetric {
     pub key: String,
     pub sum: f64,
-    pub bucket_count: u32,
     pub buckets: Vec<HistogramMetricBucket>,
 }
 
@@ -32,17 +44,31 @@ impl From<Worker_HistogramMetric> for HistogramMetric {
             .map(|s| s.to_owned())
             .unwrap();
 
-        let buckets = unsafe {
-            let mut buckets = Vec::new();
-            for index in 0..metric.bucket_count {
-                let bucket_ptr = metric.buckets.offset(index as isize as isize);
-                buckets.push(HistogramMetricBucket::from(*bucket_ptr))
-            }
-            buckets
-        };
+        let buckets = const_to_vector::<Worker_HistogramMetricBucket>(
+            metric.buckets,
+            metric.bucket_count as isize,
+        );
         Self {
             sum: metric.sum,
-            bucket_count: metric.bucket_count,
+            buckets: buckets.into_iter().map(|h| h.into()).collect(),
+            key,
+        }
+    }
+}
+
+impl Into<Worker_HistogramMetric> for HistogramMetric {
+    fn into(self) -> Worker_HistogramMetric {
+        let key = CString::new(self.key).unwrap().into_raw();
+        let buckets = self
+            .buckets
+            .into_iter()
+            .map(|b| b.into())
+            .collect::<Vec<_>>();
+
+        let (buckets, bucket_count) = vector_to_owned_array(buckets);
+        Worker_HistogramMetric {
+            sum: self.sum,
+            bucket_count: bucket_count as u32,
             key,
             buckets,
         }
@@ -69,56 +95,77 @@ impl From<Worker_GaugeMetric> for GaugeMetric {
     }
 }
 
+impl Into<Worker_GaugeMetric> for GaugeMetric {
+    fn into(self) -> Worker_GaugeMetric {
+        let key = CString::new(self.key).unwrap().into_raw();
+        Worker_GaugeMetric {
+            value: self.value,
+            key,
+        }
+    }
+}
+
 #[derive(Debug)]
 /// Parameters for sending metrics to SpatialOS.
 pub struct Metrics {
     /// The load value of this worker. If NULL, do not report load.
     pub load: Option<f64>,
-    /// The number of gauge metrics.
-    pub gauge_metric_count: u32,
     /// Array of gauge metrics.
     pub gauge_metrics: Vec<GaugeMetric>,
-    /// The number of histogram metrics.
-    pub histogram_metric_count: u32,
     /// Array of histogram metrics.
     pub histogram_metrics: Vec<HistogramMetric>,
 }
 
 impl From<Worker_Metrics> for Metrics {
     fn from(metrics: Worker_Metrics) -> Self {
-        let histogram_metrics = unsafe {
-            let mut histogram_metrics = Vec::new();
-            for index in 0..metrics.histogram_metric_count {
-                let histogram_metric_ptr =
-                    metrics.histogram_metrics.offset(index as isize as isize);
-                histogram_metrics.push(HistogramMetric::from(*histogram_metric_ptr))
-            }
-            histogram_metrics
-        };
-        let gauge_metrics = unsafe {
-            let mut gauge_metrics = Vec::new();
-            for index in 0..metrics.gauge_metric_count {
-                let gauge_metric_ptr = metrics.gauge_metrics.offset(index as isize as isize);
-                gauge_metrics.push(GaugeMetric::from(*gauge_metric_ptr))
-            }
-            gauge_metrics
-        };
+        let histogram_metrics = const_to_vector::<Worker_HistogramMetric>(
+            metrics.histogram_metrics,
+            metrics.histogram_metric_count as isize,
+        );
+        let gauge_metrics = const_to_vector::<Worker_GaugeMetric>(
+            metrics.gauge_metrics,
+            metrics.gauge_metric_count as isize,
+        );
         if metrics.load.is_null() {
             Self {
                 load: None,
-                gauge_metric_count: metrics.gauge_metric_count,
-                histogram_metric_count: metrics.histogram_metric_count,
-                histogram_metrics,
-                gauge_metrics,
+                histogram_metrics: histogram_metrics.into_iter().map(|h| h.into()).collect(),
+                gauge_metrics: gauge_metrics.into_iter().map(|h| h.into()).collect(),
             }
         } else {
             Self {
                 load: Some(unsafe { *metrics.load }),
-                gauge_metric_count: metrics.gauge_metric_count,
-                histogram_metric_count: metrics.histogram_metric_count,
-                histogram_metrics,
-                gauge_metrics,
+                histogram_metrics: histogram_metrics.into_iter().map(|h| h.into()).collect(),
+                gauge_metrics: gauge_metrics.into_iter().map(|h| h.into()).collect(),
             }
+        }
+    }
+}
+
+impl Into<Worker_Metrics> for Metrics {
+    fn into(self) -> Worker_Metrics {
+        let histogram_metrics = self
+            .histogram_metrics
+            .into_iter()
+            .map(|h| h.into())
+            .collect::<Vec<_>>();
+        let gauge_metrics = self
+            .gauge_metrics
+            .into_iter()
+            .map(|g| g.into())
+            .collect::<Vec<_>>();
+        let (histogram_metrics, histogram_metric_count) = vector_to_owned_array(histogram_metrics);
+        let (gauge_metrics, gauge_metric_count) = vector_to_owned_array(gauge_metrics);
+        Worker_Metrics {
+            load: if let Some(load) = self.load {
+                &load as *const f64
+            } else {
+                std::ptr::null()
+            },
+            gauge_metric_count: gauge_metric_count as u32,
+            histogram_metric_count: histogram_metric_count as u32,
+            histogram_metrics,
+            gauge_metrics,
         }
     }
 }

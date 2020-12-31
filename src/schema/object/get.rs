@@ -1,4 +1,9 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Schema_GetBool, Schema_GetBytes, Schema_GetDouble, Schema_GetEntityId, Schema_GetEnum,
+    Schema_GetFixed32, Schema_GetFixed64, Schema_GetFloat, Schema_GetInt32, Schema_GetInt64,
+    Schema_GetObject, Schema_GetSfixed32, Schema_GetSfixed64, Schema_GetSint32, Schema_GetSint64,
+    Schema_GetUint32, Schema_GetUint64, Schema_Object,
+};
 
 use super::Object;
 use crate::const_to_vector;

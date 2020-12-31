@@ -1,4 +1,8 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Schema_ComponentData, Schema_ComponentUpdate, Schema_CreateComponentData,
+    Schema_CreateComponentUpdate, Schema_GetComponentDataFields, Schema_GetComponentUpdateFields,
+    SCHEMA_MAP_KEY_FIELD_ID, SCHEMA_MAP_VALUE_FIELD_ID,
+};
 
 pub mod object;
 pub use object::Object;
@@ -65,8 +69,8 @@ impl From<*mut Schema_ComponentUpdate> for ComponentUpdate {
     }
 }
 
-impl From<ComponentUpdate> for *mut Schema_ComponentUpdate {
-    fn from(data: ComponentUpdate) -> Self {
-        Box::into_raw(data.inner)
+impl Into<*mut Schema_ComponentUpdate> for ComponentUpdate {
+    fn into(self) -> *mut Schema_ComponentUpdate {
+        Box::into_raw(self.inner)
     }
 }

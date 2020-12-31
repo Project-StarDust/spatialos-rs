@@ -1,4 +1,8 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Schema_GetBoolCount, Schema_GetBytesCount, Schema_GetDoubleCount, Schema_GetEnumCount,
+    Schema_GetFloatCount, Schema_GetInt64Count, Schema_GetObjectCount, Schema_GetUint32Count,
+    Schema_Object,
+};
 
 use super::Object;
 use crate::schema::FieldId;

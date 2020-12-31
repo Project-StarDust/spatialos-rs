@@ -1,7 +1,7 @@
-use spatialos_sys::*;
+use spatialos_sys::{Schema_AllocateBuffer, Schema_GetBytesLength, Schema_Object};
 
-use bytevec::ByteEncodable;
 use crate::schema::FieldId;
+use bytevec::ByteEncodable;
 
 mod add;
 mod add_list;

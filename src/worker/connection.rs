@@ -1,4 +1,20 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Worker_ConnectAsync, Worker_Connection, Worker_ConnectionFuture_Destroy,
+    Worker_ConnectionFuture_Get, Worker_ConnectionParameters, Worker_Connection_Destroy,
+    Worker_Connection_GetOpList, Worker_Connection_SendEntityQueryRequest,
+    Worker_Connection_SendLogMessage, Worker_DefaultConnectionParameters,
+    Worker_ModularKcpNetworkParameters, Worker_NetworkConnectionType, Worker_NetworkParameters,
+    Worker_NetworkSecurityType,
+};
+
+use spatialos_sys::{
+    Worker_ComponentVtable, Worker_CompressionParameters, Worker_ConnectionFuture,
+    Worker_EntityQuery, Worker_ErasureCodecParameters, Worker_FlowControlParameters,
+    Worker_HeartbeatParameters, Worker_KcpNetworkParameters, Worker_KcpTransportParameters,
+    Worker_LogMessage, Worker_LogsinkParameters, Worker_ModularTcpNetworkParameters,
+    Worker_ProtocolLoggingParameters, Worker_RakNetNetworkParameters, Worker_TcpNetworkParameters,
+    Worker_ThreadAffinityParameters,
+};
 
 use crate::worker::log_message::LogMessage;
 use crate::worker::op::OpList;
@@ -39,14 +55,18 @@ impl From<Worker_NetworkConnectionType> for NetworkConnectionType {
     }
 }
 
-impl From<NetworkConnectionType> for Worker_NetworkConnectionType {
-    fn from(connection_type: NetworkConnectionType) -> Self {
-        match connection_type {
-            NetworkConnectionType::Tcp => Self::WORKER_NETWORK_CONNECTION_TYPE_TCP,
-            NetworkConnectionType::RakNet => Self::WORKER_NETWORK_CONNECTION_TYPE_RAKNET,
-            NetworkConnectionType::Kcp => Self::WORKER_NETWORK_CONNECTION_TYPE_KCP,
-            NetworkConnectionType::ModularKcp => Self::WORKER_NETWORK_CONNECTION_TYPE_MODULAR_KCP,
-            NetworkConnectionType::ModularTcp => Self::WORKER_NETWORK_CONNECTION_TYPE_MODULAR_TCP,
+impl Into<Worker_NetworkConnectionType> for NetworkConnectionType {
+    fn into(self) -> Worker_NetworkConnectionType {
+        match self {
+            Self::Tcp => Worker_NetworkConnectionType::WORKER_NETWORK_CONNECTION_TYPE_TCP,
+            Self::RakNet => Worker_NetworkConnectionType::WORKER_NETWORK_CONNECTION_TYPE_RAKNET,
+            Self::Kcp => Worker_NetworkConnectionType::WORKER_NETWORK_CONNECTION_TYPE_KCP,
+            Self::ModularKcp => {
+                Worker_NetworkConnectionType::WORKER_NETWORK_CONNECTION_TYPE_MODULAR_KCP
+            }
+            Self::ModularTcp => {
+                Worker_NetworkConnectionType::WORKER_NETWORK_CONNECTION_TYPE_MODULAR_TCP
+            }
         }
     }
 }
@@ -57,9 +77,9 @@ impl From<u8> for NetworkConnectionType {
     }
 }
 
-impl From<NetworkConnectionType> for u8 {
-    fn from(connection_type: NetworkConnectionType) -> Self {
-        let connection_type: Worker_NetworkConnectionType = connection_type.into();
+impl Into<u8> for NetworkConnectionType {
+    fn into(self) -> u8 {
+        let connection_type: Worker_NetworkConnectionType = self.into();
         connection_type.into()
     }
 }
@@ -81,24 +101,24 @@ impl From<Worker_NetworkSecurityType> for NetworkSecurityType {
     }
 }
 
+impl Into<Worker_NetworkSecurityType> for NetworkSecurityType {
+    fn into(self) -> Worker_NetworkSecurityType {
+        match self {
+            Self::Insecure => Worker_NetworkSecurityType::WORKER_NETWORK_SECURITY_TYPE_INSECURE,
+            Self::Tls => Worker_NetworkSecurityType::WORKER_NETWORK_SECURITY_TYPE_TLS,
+        }
+    }
+}
+
 impl From<u8> for NetworkSecurityType {
     fn from(security_type: u8) -> Self {
         NetworkSecurityType::from(Worker_NetworkSecurityType::from(security_type))
     }
 }
 
-impl From<NetworkSecurityType> for Worker_NetworkSecurityType {
-    fn from(security_type: NetworkSecurityType) -> Self {
-        match security_type {
-            NetworkSecurityType::Insecure => Self::WORKER_NETWORK_SECURITY_TYPE_INSECURE,
-            NetworkSecurityType::Tls => Self::WORKER_NETWORK_SECURITY_TYPE_TLS,
-        }
-    }
-}
-
-impl From<NetworkSecurityType> for u8 {
-    fn from(security_type: NetworkSecurityType) -> Self {
-        let security_type: Worker_NetworkSecurityType = security_type.into();
+impl Into<u8> for NetworkSecurityType {
+    fn into(self) -> u8 {
+        let security_type: Worker_NetworkSecurityType = self.into();
         security_type.into()
     }
 }
@@ -150,20 +170,20 @@ impl From<Worker_ModularKcpNetworkParameters> for ModularKcpNetworkParameters {
     }
 }
 
-impl From<ModularKcpNetworkParameters> for Worker_ModularKcpNetworkParameters {
-    fn from(parameters: ModularKcpNetworkParameters) -> Self {
-        Self {
-            security_type: parameters.security_type.into(),
-            multiplex_level: parameters.multiplex_level,
-            downstream_kcp: parameters.downstream_kcp,
-            upstream_kcp: parameters.upstream_kcp,
-            downstream_erasure_codec: parameters.downstream_erasure_codec,
-            upstream_erasure_codec: parameters.upstream_erasure_codec,
-            downstream_heartbeat: parameters.downstream_heartbeat,
-            upstream_heartbeat: parameters.upstream_heartbeat,
-            downstream_compression: parameters.downstream_compression,
-            upstream_compression: parameters.upstream_compression,
-            flow_control: parameters.flow_control,
+impl Into<Worker_ModularKcpNetworkParameters> for ModularKcpNetworkParameters {
+    fn into(self) -> Worker_ModularKcpNetworkParameters {
+        Worker_ModularKcpNetworkParameters {
+            security_type: self.security_type.into(),
+            multiplex_level: self.multiplex_level,
+            downstream_kcp: self.downstream_kcp,
+            upstream_kcp: self.upstream_kcp,
+            downstream_erasure_codec: self.downstream_erasure_codec,
+            upstream_erasure_codec: self.upstream_erasure_codec,
+            downstream_heartbeat: self.downstream_heartbeat,
+            upstream_heartbeat: self.upstream_heartbeat,
+            downstream_compression: self.downstream_compression,
+            upstream_compression: self.upstream_compression,
+            flow_control: self.flow_control,
         }
     }
 }
@@ -197,22 +217,6 @@ impl From<Worker_NetworkParameters> for NetworkParameters {
     fn from(parameters: Worker_NetworkParameters) -> Self {
         Self {
             use_external_ip: parameters.use_external_ip,
-            connection_type: NetworkConnectionType::from(parameters.connection_type),
-            raknet: parameters.raknet,
-            tcp: parameters.tcp,
-            kcp: parameters.kcp,
-            modular_kcp: ModularKcpNetworkParameters::from(parameters.modular_kcp),
-            modular_tcp: parameters.modular_tcp,
-            connection_timeout_millis: parameters.connection_timeout_millis,
-            default_command_timeout_millis: parameters.default_command_timeout_millis,
-        }
-    }
-}
-
-impl From<NetworkParameters> for Worker_NetworkParameters {
-    fn from(parameters: NetworkParameters) -> Self {
-        Self {
-            use_external_ip: parameters.use_external_ip,
             connection_type: parameters.connection_type.into(),
             raknet: parameters.raknet,
             tcp: parameters.tcp,
@@ -221,6 +225,22 @@ impl From<NetworkParameters> for Worker_NetworkParameters {
             modular_tcp: parameters.modular_tcp,
             connection_timeout_millis: parameters.connection_timeout_millis,
             default_command_timeout_millis: parameters.default_command_timeout_millis,
+        }
+    }
+}
+
+impl Into<Worker_NetworkParameters> for NetworkParameters {
+    fn into(self) -> Worker_NetworkParameters {
+        Worker_NetworkParameters {
+            use_external_ip: self.use_external_ip,
+            connection_type: self.connection_type.into(),
+            raknet: self.raknet,
+            tcp: self.tcp,
+            kcp: self.kcp,
+            modular_kcp: self.modular_kcp.into(),
+            modular_tcp: self.modular_tcp,
+            connection_timeout_millis: self.connection_timeout_millis,
+            default_command_timeout_millis: self.default_command_timeout_millis,
         }
     }
 }
@@ -297,25 +317,25 @@ impl From<Worker_ConnectionParameters> for ConnectionParameters {
     }
 }
 
-impl From<ConnectionParameters> for Worker_ConnectionParameters {
-    fn from(parameters: ConnectionParameters) -> Self {
-        let worker_type = CString::new(parameters.worker_type).unwrap();
-        Self {
-            network: parameters.network.into(),
-            send_queue_capacity: parameters.send_queue_capacity,
-            receive_queue_capacity: parameters.receive_queue_capacity,
-            log_message_queue_capacity: parameters.log_message_queue_capacity,
-            built_in_metrics_report_period_millis: parameters.built_in_metrics_report_period_millis,
-            protocol_logging: parameters.protocol_logging,
-            enable_protocol_logging_at_startup: parameters.enable_protocol_logging_at_startup,
-            logsink_count: parameters.logsink_count,
-            logsinks: parameters.logsinks,
-            enable_logging_at_startup: parameters.enable_logging_at_startup,
-            enable_dynamic_components: parameters.enable_dynamic_components,
-            thread_affinity: parameters.thread_affinity,
-            component_vtable_count: parameters.component_vtable_count,
-            component_vtables: parameters.component_vtables,
-            default_component_vtable: parameters.default_component_vtable,
+impl Into<Worker_ConnectionParameters> for ConnectionParameters {
+    fn into(self) -> Worker_ConnectionParameters {
+        let worker_type = CString::new(self.worker_type).unwrap();
+        Worker_ConnectionParameters {
+            network: self.network.into(),
+            send_queue_capacity: self.send_queue_capacity,
+            receive_queue_capacity: self.receive_queue_capacity,
+            log_message_queue_capacity: self.log_message_queue_capacity,
+            built_in_metrics_report_period_millis: self.built_in_metrics_report_period_millis,
+            protocol_logging: self.protocol_logging,
+            enable_protocol_logging_at_startup: self.enable_protocol_logging_at_startup,
+            logsink_count: self.logsink_count,
+            logsinks: self.logsinks,
+            enable_logging_at_startup: self.enable_logging_at_startup,
+            enable_dynamic_components: self.enable_dynamic_components,
+            thread_affinity: self.thread_affinity,
+            component_vtable_count: self.component_vtable_count,
+            component_vtables: self.component_vtables,
+            default_component_vtable: self.default_component_vtable,
             worker_type: worker_type.into_raw() as *const c_char,
         }
     }
@@ -398,7 +418,7 @@ impl Connection {
         unsafe {
             Worker_Connection_SendLogMessage(
                 self.inner,
-                &Worker_LogMessage::from(log_message) as *const Worker_LogMessage,
+                &log_message.into() as *const Worker_LogMessage,
             )
         }
     }

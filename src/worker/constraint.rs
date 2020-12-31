@@ -1,4 +1,8 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Worker_AndConstraint, Worker_ComponentConstraint, Worker_Constraint, Worker_ConstraintType,
+    Worker_Constraint_Union, Worker_EntityIdConstraint, Worker_NotConstraint, Worker_OrConstraint,
+    Worker_SphereConstraint,
+};
 
 use crate::worker::ComponentId;
 use crate::worker::EntityId;

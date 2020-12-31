@@ -1,4 +1,4 @@
-use spatialos_sys::*;
+use spatialos_sys::Worker_LogMessage;
 
 use crate::worker::EntityId;
 use crate::worker::LogLevel;
@@ -40,20 +40,20 @@ impl From<Worker_LogMessage> for LogMessage {
     }
 }
 
-impl From<LogMessage> for Worker_LogMessage {
-    fn from(log_message: LogMessage) -> Self {
-        let message = CString::new(log_message.message).unwrap();
-        let logger_name = CString::new(log_message.logger_name).unwrap();
-        if let Some(entity_id) = log_message.entity_id {
-            Self {
-                level: log_message.level.into(),
+impl Into<Worker_LogMessage> for LogMessage {
+    fn into(self) -> Worker_LogMessage {
+        let message = CString::new(self.message).unwrap();
+        let logger_name = CString::new(self.logger_name).unwrap();
+        if let Some(entity_id) = self.entity_id {
+            Worker_LogMessage {
+                level: self.level.into(),
                 message: message.into_raw(),
                 logger_name: logger_name.into_raw(),
                 entity_id: &entity_id as *const EntityId,
             }
         } else {
-            Self {
-                level: log_message.level.into(),
+            Worker_LogMessage {
+                level: self.level.into(),
                 message: message.into_raw(),
                 logger_name: logger_name.into_raw(),
                 entity_id: std::ptr::null(),

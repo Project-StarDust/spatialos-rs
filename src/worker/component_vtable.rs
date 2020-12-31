@@ -1,10 +1,13 @@
-use spatialos_sys::*;
 use crate::worker::CommandIndex;
 use crate::worker::CommandRequestHandle;
 use crate::worker::CommandResponseHandle;
 use crate::worker::ComponentDataHandle;
 use crate::worker::ComponentId;
 use crate::worker::ComponentUpdateHandle;
+use spatialos_sys::{
+    Schema_CommandRequest, Schema_CommandResponse, Schema_ComponentData, Schema_ComponentUpdate,
+    Worker_CommandRequestHandle, Worker_ComponentVtable,
+};
 use std::os::raw::c_void;
 
 pub type CommandRequestFreeFn =
@@ -175,27 +178,27 @@ pub struct ComponentVtable {
     pub component_update_serialize: Option<ComponentUpdateSerialize>,
 }
 
-impl From<ComponentVtable> for Worker_ComponentVtable {
-    fn from(vtable: ComponentVtable) -> Self {
-        Self {
-            component_id: vtable.component_id,
-            user_data: vtable.user_data,
-            command_request_free: vtable.command_request_free,
-            command_request_copy: vtable.command_request_copy,
-            command_request_deserialize: vtable.command_request_deserialize,
-            command_request_serialize: vtable.command_request_serialize,
-            command_response_free: vtable.command_response_free,
-            command_response_copy: vtable.command_response_copy,
-            command_response_deserialize: vtable.command_response_deserialize,
-            command_response_serialize: vtable.command_response_serialize,
-            component_data_free: vtable.component_data_free,
-            component_data_copy: vtable.component_data_copy,
-            component_data_deserialize: vtable.component_data_deserialize,
-            component_data_serialize: vtable.component_data_serialize,
-            component_update_free: vtable.component_update_free,
-            component_update_copy: vtable.component_update_copy,
-            component_update_deserialize: vtable.component_update_deserialize,
-            component_update_serialize: vtable.component_update_serialize,
+impl Into<Worker_ComponentVtable> for ComponentVtable {
+    fn into(self) -> Worker_ComponentVtable {
+        Worker_ComponentVtable {
+            component_id: self.component_id,
+            user_data: self.user_data,
+            command_request_free: self.command_request_free,
+            command_request_copy: self.command_request_copy,
+            command_request_deserialize: self.command_request_deserialize,
+            command_request_serialize: self.command_request_serialize,
+            command_response_free: self.command_response_free,
+            command_response_copy: self.command_response_copy,
+            command_response_deserialize: self.command_response_deserialize,
+            command_response_serialize: self.command_response_serialize,
+            component_data_free: self.component_data_free,
+            component_data_copy: self.component_data_copy,
+            component_data_deserialize: self.component_data_deserialize,
+            component_data_serialize: self.component_data_serialize,
+            component_update_free: self.component_update_free,
+            component_update_copy: self.component_update_copy,
+            component_update_deserialize: self.component_update_deserialize,
+            component_update_serialize: self.component_update_serialize,
         }
     }
 }

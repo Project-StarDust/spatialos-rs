@@ -1,4 +1,16 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Worker_AddComponentOp, Worker_AddEntityOp, Worker_AuthorityChangeOp, Worker_CommandResponseOp,
+    Worker_ComponentUpdateOp, Worker_CreateEntityResponseOp, Worker_CriticalSectionOp,
+    Worker_DeleteEntityResponseOp, Worker_DisconnectOp, Worker_EntityQueryResponseOp,
+    Worker_FlagUpdateOp, Worker_LogMessageOp, Worker_MetricsOp, Worker_Op, Worker_OpList,
+    Worker_OpList_Destroy, Worker_OpType, Worker_RemoveComponentOp, Worker_RemoveEntityOp,
+    Worker_ReserveEntityIdsResponseOp,
+};
+
+use spatialos_sys::{
+    Worker_CommandRequest, Worker_CommandRequestOp, Worker_CommandResponse, Worker_ComponentData,
+    Worker_ComponentUpdate,
+};
 
 use crate::const_to_vector;
 use crate::worker::metrics::Metrics;

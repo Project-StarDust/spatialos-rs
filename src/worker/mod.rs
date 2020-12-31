@@ -1,4 +1,10 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Worker_Authority, Worker_CommandIndex, Worker_CommandRequestHandle,
+    Worker_CommandResponseHandle, Worker_ComponentData, Worker_ComponentDataHandle,
+    Worker_ComponentId, Worker_ConnectionStatusCode, Worker_Entity, Worker_EntityId,
+    Worker_EntityQuery, Worker_LogLevel, Worker_RequestId, Worker_ResultType, Worker_StatusCode,
+    Worker_WorkerAttributes,
+};
 
 pub mod component_vtable;
 pub mod connection;
@@ -7,20 +13,20 @@ pub mod log_message;
 pub mod metrics;
 pub mod op;
 
-use crate::worker::constraint::Constraint;
 use crate::worker::constraint::EntityIdConstraint;
 use crate::{const_to_vector, schema};
+use crate::{vector_to_owned_array, worker::constraint::Constraint};
 use std::ffi::CStr;
 use std::os::raw::c_void;
 
-pub type EntityId = i64;
-pub type ComponentId = u32;
-pub type RequestId = i64;
-pub type CommandIndex = u32;
+pub type EntityId = Worker_EntityId;
+pub type ComponentId = Worker_ComponentId;
+pub type RequestId = Worker_RequestId;
+pub type CommandIndex = Worker_CommandIndex;
 
-pub type CommandRequestHandle = c_void;
-pub type CommandResponseHandle = c_void;
-pub type ComponentDataHandle = c_void;
+pub type CommandRequestHandle = Worker_CommandRequestHandle;
+pub type CommandResponseHandle = Worker_CommandResponseHandle;
+pub type ComponentDataHandle = Worker_ComponentDataHandle;
 pub type ComponentUpdateHandle = c_void;
 
 #[derive(Debug)]
@@ -46,27 +52,28 @@ impl From<Worker_LogLevel> for LogLevel {
     }
 }
 
-impl From<u8> for LogLevel {
-    fn from(log_level: u8) -> Self {
-        LogLevel::from(Worker_LogLevel::from(log_level))
-    }
-}
-
-impl From<LogLevel> for Worker_LogLevel {
-    fn from(log_level: LogLevel) -> Self {
-        match log_level {
-            LogLevel::Debug => Self::WORKER_LOG_LEVEL_DEBUG,
-            LogLevel::Info => Self::WORKER_LOG_LEVEL_INFO,
-            LogLevel::Warn => Self::WORKER_LOG_LEVEL_WARN,
-            LogLevel::Error => Self::WORKER_LOG_LEVEL_ERROR,
-            LogLevel::Fatal => Self::WORKER_LOG_LEVEL_FATAL,
+impl Into<Worker_LogLevel> for LogLevel {
+    fn into(self) -> Worker_LogLevel {
+        match self {
+            Self::Debug => Worker_LogLevel::WORKER_LOG_LEVEL_DEBUG,
+            Self::Info => Worker_LogLevel::WORKER_LOG_LEVEL_INFO,
+            Self::Warn => Worker_LogLevel::WORKER_LOG_LEVEL_WARN,
+            Self::Error => Worker_LogLevel::WORKER_LOG_LEVEL_ERROR,
+            Self::Fatal => Worker_LogLevel::WORKER_LOG_LEVEL_FATAL,
         }
     }
 }
 
-impl From<LogLevel> for u8 {
-    fn from(log_level: LogLevel) -> Self {
+impl From<u8> for LogLevel {
+    fn from(log_level: u8) -> Self {
         let log_level: Worker_LogLevel = log_level.into();
+        log_level.into()
+    }
+}
+
+impl Into<u8> for LogLevel {
+    fn into(self) -> u8 {
+        let log_level: Worker_LogLevel = self.into();
         log_level.into()
     }
 }
@@ -272,24 +279,26 @@ impl From<Worker_ResultType> for ResultType {
     }
 }
 
-impl From<u8> for ResultType {
-    fn from(result_type: u8) -> Self {
-        ResultType::from(Worker_ResultType::from(result_type))
-    }
-}
-
-impl From<ResultType> for Worker_ResultType {
-    fn from(result_type: ResultType) -> Self {
-        match result_type {
-            ResultType::Count => Self::WORKER_RESULT_TYPE_COUNT,
-            ResultType::Snapshot => Self::WORKER_RESULT_TYPE_SNAPSHOT,
+impl Into<Worker_ResultType> for ResultType {
+    fn into(self) -> Worker_ResultType {
+        match self {
+            Self::Count => Worker_ResultType::WORKER_RESULT_TYPE_COUNT,
+            Self::Snapshot => Worker_ResultType::WORKER_RESULT_TYPE_SNAPSHOT,
         }
     }
 }
 
-impl From<ResultType> for u8 {
-    fn from(result_type: ResultType) -> Self {
-        Worker_ResultType::from(result_type).into()
+impl From<u8> for ResultType {
+    fn from(result_type: u8) -> Self {
+        let result_type: Worker_ResultType = result_type.into();
+        result_type.into()
+    }
+}
+
+impl Into<u8> for ResultType {
+    fn into(self) -> u8 {
+        let result_type: Worker_ResultType = self.into();
+        result_type.into()
     }
 }
 
@@ -299,8 +308,6 @@ pub struct EntityQuery {
     pub constraint: Constraint,
     /// Result type for this query, using Worker_ResultType.
     pub result_type: ResultType,
-    /// Number of component IDs in the array for a snapshot result type.
-    pub snapshot_result_type_component_id_count: u32,
     /// Pointer to component ID data for a snapshot result type. None means all component IDs.
     pub snapshot_result_type_component_ids: Vec<ComponentId>,
 }
@@ -310,7 +317,6 @@ impl Default for EntityQuery {
         Self {
             constraint: Constraint::EntityId(EntityIdConstraint { entity_id: 0 }),
             result_type: ResultType::Count,
-            snapshot_result_type_component_id_count: 0,
             snapshot_result_type_component_ids: Vec::new(),
         }
     }
@@ -318,41 +324,27 @@ impl Default for EntityQuery {
 
 impl From<Worker_EntityQuery> for EntityQuery {
     fn from(query: Worker_EntityQuery) -> Self {
-        let snapshot_result_type_component_ids =
-            if query.snapshot_result_type_component_ids.is_null() {
-                Vec::new()
-            } else {
-                unsafe {
-                    let mut component_ids = Vec::new();
-                    for index in 0..query.snapshot_result_type_component_id_count {
-                        let component_id_ptr = query
-                            .snapshot_result_type_component_ids
-                            .offset(index as isize);
-                        component_ids.push(*component_id_ptr);
-                    }
-                    component_ids
-                }
-            };
+        let snapshot_result_type_component_ids = const_to_vector(
+            query.snapshot_result_type_component_ids,
+            query.snapshot_result_type_component_id_count as isize,
+        );
         Self {
             constraint: query.constraint.into(),
             result_type: query.result_type.into(),
-            snapshot_result_type_component_id_count: query.snapshot_result_type_component_id_count,
             snapshot_result_type_component_ids,
         }
     }
 }
 
-impl From<EntityQuery> for Worker_EntityQuery {
-    fn from(query: EntityQuery) -> Self {
-        let mut vec = query.snapshot_result_type_component_ids;
-        vec.shrink_to_fit();
-        let vec_ptr = vec.as_mut_ptr();
-        std::mem::forget(vec);
-        Self {
-            constraint: query.constraint.into(),
-            result_type: query.result_type.into(),
-            snapshot_result_type_component_id_count: query.snapshot_result_type_component_id_count,
-            snapshot_result_type_component_ids: vec_ptr,
+impl Into<Worker_EntityQuery> for EntityQuery {
+    fn into(self) -> Worker_EntityQuery {
+        let (snapshot_result_type_component_ids, snapshot_result_type_component_id_count) =
+            vector_to_owned_array(self.snapshot_result_type_component_ids);
+        Worker_EntityQuery {
+            constraint: self.constraint.into(),
+            result_type: self.result_type.into(),
+            snapshot_result_type_component_id_count: snapshot_result_type_component_id_count as u32,
+            snapshot_result_type_component_ids,
         }
     }
 }
@@ -382,6 +374,22 @@ impl From<Worker_Entity> for Entity {
     }
 }
 
+impl Into<Worker_Entity> for Entity {
+    fn into(self) -> Worker_Entity {
+        let components = self
+            .components
+            .into_iter()
+            .map(|c| c.into())
+            .collect::<Vec<_>>();
+        let (components, component_count) = vector_to_owned_array(components);
+        Worker_Entity {
+            entity_id: self.entity_id,
+            component_count: component_count as u32,
+            components,
+        }
+    }
+}
+
 /// An object used to represent a component data snapshot by either raw schema data or some
 /// user-defined handle type.
 #[derive(Debug, Clone)]
@@ -399,6 +407,17 @@ impl From<Worker_ComponentData> for ComponentData {
             component_id: data.component_id,
             schema_type: data.schema_type.into(),
             user_handle: data.user_handle,
+        }
+    }
+}
+
+impl Into<Worker_ComponentData> for ComponentData {
+    fn into(self) -> Worker_ComponentData {
+        Worker_ComponentData {
+            reserved: self.reserved,
+            component_id: self.component_id,
+            schema_type: self.schema_type.into(),
+            user_handle: self.user_handle,
         }
     }
 }

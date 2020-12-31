@@ -1,4 +1,6 @@
-use spatialos_sys::*;
+use spatialos_sys::{
+    Schema_IndexBytes, Schema_IndexBytesLength, Schema_IndexEnum, Schema_IndexObject, Schema_Object,
+};
 
 use crate::{const_to_vector, schema::FieldId};
 
