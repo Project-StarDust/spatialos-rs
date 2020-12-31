@@ -5,6 +5,8 @@ pub mod private_exports {
     pub use spatialos_sys::*;
 }
 
+pub use spatialos_sys::*;
+
 pub fn mut_to_vector<T>(data: *mut T, size: isize) -> Vec<T> {
     if data.is_null() {
         Vec::new()

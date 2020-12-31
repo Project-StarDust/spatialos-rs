@@ -15,10 +15,10 @@ impl From<Worker_EntityIdConstraint> for EntityIdConstraint {
     }
 }
 
-impl From<EntityIdConstraint> for Worker_EntityIdConstraint {
-    fn from(constraint: EntityIdConstraint) -> Self {
-        Self {
-            entity_id: constraint.entity_id,
+impl Into<Worker_EntityIdConstraint> for EntityIdConstraint {
+    fn into(self) -> Worker_EntityIdConstraint {
+        Worker_EntityIdConstraint {
+            entity_id: self.entity_id,
         }
     }
 }
@@ -35,10 +35,10 @@ impl From<Worker_ComponentConstraint> for ComponentConstraint {
     }
 }
 
-impl From<ComponentConstraint> for Worker_ComponentConstraint {
-    fn from(constraint: ComponentConstraint) -> Self {
-        Self {
-            component_id: constraint.component_id,
+impl Into<Worker_ComponentConstraint> for ComponentConstraint {
+    fn into(self) -> Worker_ComponentConstraint {
+        Worker_ComponentConstraint {
+            component_id: self.component_id,
         }
     }
 }
@@ -61,13 +61,13 @@ impl From<Worker_SphereConstraint> for SphereConstraint {
     }
 }
 
-impl From<SphereConstraint> for Worker_SphereConstraint {
-    fn from(constraint: SphereConstraint) -> Self {
-        Self {
-            x: constraint.x,
-            y: constraint.y,
-            z: constraint.z,
-            radius: constraint.radius,
+impl Into<Worker_SphereConstraint> for SphereConstraint {
+    fn into(self) -> Worker_SphereConstraint {
+        Worker_SphereConstraint {
+            x: self.x,
+            y: self.y,
+            z: self.z,
+            radius: self.radius,
         }
     }
 }
@@ -90,8 +90,8 @@ impl From<Worker_OrConstraint> for OrConstraint {
     }
 }
 
-impl From<OrConstraint> for Worker_OrConstraint {
-    fn from(_constraint: OrConstraint) -> Self {
+impl Into<Worker_OrConstraint> for OrConstraint {
+    fn into(self) -> Worker_OrConstraint {
         todo!()
     }
 }
@@ -114,8 +114,8 @@ impl From<Worker_AndConstraint> for AndConstraint {
     }
 }
 
-impl From<AndConstraint> for Worker_AndConstraint {
-    fn from(_constraint: AndConstraint) -> Self {
+impl Into<Worker_AndConstraint> for AndConstraint {
+    fn into(self) -> Worker_AndConstraint {
         todo!()
     }
 }
@@ -133,12 +133,12 @@ impl From<Worker_NotConstraint> for NotConstraint {
     }
 }
 
-impl From<NotConstraint> for Worker_NotConstraint {
-    fn from(constraint: NotConstraint) -> Self {
-        let constraint = *constraint.constraint;
-        let constraint = Box::new(Worker_Constraint::from(constraint));
+impl Into<Worker_NotConstraint> for NotConstraint {
+    fn into(self) -> Worker_NotConstraint {
+        let constraint = *self.constraint;
+        let constraint = Box::new(constraint.into());
         let constraint = Box::into_raw(constraint);
-        Self { constraint }
+        Worker_NotConstraint { constraint }
     }
 }
 
@@ -188,40 +188,40 @@ impl From<Worker_Constraint> for Constraint {
     }
 }
 
-impl From<Constraint> for Worker_Constraint {
-    fn from(constraint: Constraint) -> Self {
-        match constraint {
-            Constraint::EntityId(entity_id) => Self {
+impl Into<Worker_Constraint> for Constraint {
+    fn into(self) -> Worker_Constraint {
+        match self {
+            Self::EntityId(entity_id) => Worker_Constraint {
                 constraint_type: Worker_ConstraintType::WORKER_CONSTRAINT_TYPE_ENTITY_ID.into(),
                 constraint: Worker_Constraint_Union {
                     entity_id_constraint: entity_id.into(),
                 },
             },
-            Constraint::Component(component) => Self {
+            Self::Component(component) => Worker_Constraint {
                 constraint_type: Worker_ConstraintType::WORKER_CONSTRAINT_TYPE_COMPONENT.into(),
                 constraint: Worker_Constraint_Union {
                     component_constraint: component.into(),
                 },
             },
-            Constraint::Sphere(sphere) => Self {
+            Self::Sphere(sphere) => Worker_Constraint {
                 constraint_type: Worker_ConstraintType::WORKER_CONSTRAINT_TYPE_SPHERE.into(),
                 constraint: Worker_Constraint_Union {
                     sphere_constraint: sphere.into(),
                 },
             },
-            Constraint::And(and) => Self {
+            Self::And(and) => Worker_Constraint {
                 constraint_type: Worker_ConstraintType::WORKER_CONSTRAINT_TYPE_AND.into(),
                 constraint: Worker_Constraint_Union {
                     and_constraint: and.into(),
                 },
             },
-            Constraint::Or(or) => Self {
+            Self::Or(or) => Worker_Constraint {
                 constraint_type: Worker_ConstraintType::WORKER_CONSTRAINT_TYPE_OR.into(),
                 constraint: Worker_Constraint_Union {
                     or_constraint: or.into(),
                 },
             },
-            Constraint::Not(not) => Self {
+            Self::Not(not) => Worker_Constraint {
                 constraint_type: Worker_ConstraintType::WORKER_CONSTRAINT_TYPE_NOT.into(),
                 constraint: Worker_Constraint_Union {
                     not_constraint: not.into(),

@@ -12,6 +12,6 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-spatialos-sys = "0.2.0"
-bytevec = "0.2.0"
+spatialos-sys = "0.2"
+bytevec = "0.2"
 
