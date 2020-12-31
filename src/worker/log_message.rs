@@ -5,15 +5,15 @@ use crate::worker::LogLevel;
 use std::ffi::CStr;
 use std::ffi::CString;
 
-#[doc = " Parameters for sending a log message to SpatialOS."]
+/// Parameters for sending a log message to SpatialOS.
 pub struct LogMessage {
-    #[doc = " The severity of the log message; defined in the LogLevel enumeration."]
+    /// The severity of the log message; defined in the LogLevel enumeration.
     pub level: LogLevel,
-    #[doc = " The name of the logger."]
+    /// The name of the logger.
     pub logger_name: String,
-    #[doc = " The full log message."]
+    /// The full log message.
     pub message: String,
-    #[doc = " The ID of the entity this message relates to, or NULL for none."]
+    /// The ID of the entity this message relates to, or NULL for none.
     pub entity_id: Option<EntityId>,
 }
 

@@ -13,7 +13,7 @@ use crate::worker::StatusCode;
 use crate::worker::WorkerAttributes;
 use std::ffi::CStr;
 
-#[doc = " An op list, usually returned by Connectio::get_op_list."]
+/// An op list, usually returned by Connectio::get_op_list.
 pub struct OpList {
     pub ops: Vec<WorkerOp>,
     inner: *mut Worker_OpList,
@@ -43,7 +43,7 @@ impl Drop for OpList {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a single op contained within an op list."]
+/// Data for a single op contained within an op list.
 pub enum WorkerOp {
     Disconnect(DisconnectOp),
     FlagUpdate(FlagUpdateOp),
@@ -131,11 +131,11 @@ impl From<Worker_Op> for WorkerOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a disconnect message from the SDK."]
+/// Data for a disconnect message from the SDK.
 pub struct DisconnectOp {
-    #[doc = " A value from the Worker_ConnectionStatusCode enumeration."]
+    /// A value from the Worker_ConnectionStatusCode enumeration.
     pub status_code: ConnectionStatusCode,
-    #[doc = " A string giving detailed information on the reason for disconnecting."]
+    /// A string giving detailed information on the reason for disconnecting.
     pub reason: String,
 }
 
@@ -153,13 +153,13 @@ impl From<Worker_DisconnectOp> for DisconnectOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a log message from the SDK."]
-#[doc = " Note: Worker_LogMessageOp has been deprecated and will be removed in a future version of"]
-#[doc = " SpatialOS."]
+/// Data for a log message from the SDK.
+/// Note: Worker_LogMessageOp has been deprecated and will be removed in a future version of
+/// SpatialOS.
 pub struct LogMessageOp {
-    #[doc = " The severity of the log message; defined in the LogLevel enumeration."]
+    /// The severity of the log message; defined in the LogLevel enumeration.
     pub level: LogLevel,
-    #[doc = " The message."]
+    /// The message.
     pub message: String,
 }
 
@@ -177,12 +177,12 @@ impl From<Worker_LogMessageOp> for LogMessageOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for an AddComponent operation."]
+/// Data for an AddComponent operation.
 pub struct AddComponentOp {
-    #[doc = " The ID of the entity for which a component was added."]
+    /// The ID of the entity for which a component was added.
     pub entity_id: EntityId,
-    #[doc = " The initial data for the new component. Deserialized with the corresponding vtable deserialize"]
-    #[doc = " function and freed with the vtable free function when the OpList is destroyed."]
+    /// The initial data for the new component. Deserialized with the corresponding vtable deserialize
+    /// function and freed with the vtable free function when the OpList is destroyed.
     pub data: Worker_ComponentData,
 }
 
@@ -196,9 +196,9 @@ impl From<Worker_AddComponentOp> for AddComponentOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for an AddEntity operation."]
+/// Data for an AddEntity operation.
 pub struct AddEntityOp {
-    #[doc = " The ID of the entity that was added to the worker's view of the simulation."]
+    /// The ID of the entity that was added to the worker's view of the simulation.
     pub entity_id: EntityId,
 }
 
@@ -211,13 +211,13 @@ impl From<Worker_AddEntityOp> for AddEntityOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for an AuthorityChange operation."]
+/// Data for an AuthorityChange operation.
 pub struct AuthorityChangeOp {
-    #[doc = " The ID of the entity for which there was an authority change."]
+    /// The ID of the entity for which there was an authority change.
     pub entity_id: EntityId,
-    #[doc = " The ID of the component over which the worker's authority has changed."]
+    /// The ID of the component over which the worker's authority has changed.
     pub component_id: ComponentId,
-    #[doc = " The authority state of the component, using the Authority enumeration."]
+    /// The authority state of the component, using the Authority enumeration.
     pub authority: Authority,
 }
 
@@ -232,20 +232,20 @@ impl From<Worker_AuthorityChangeOp> for AuthorityChangeOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a CommandRequest operation."]
+/// Data for a CommandRequest operation.
 pub struct CommandRequestOp {
-    #[doc = " The incoming command request ID."]
+    /// The incoming command request ID.
     pub request_id: RequestId,
-    #[doc = " The ID of the entity for which there was a command request."]
+    /// The ID of the entity for which there was a command request.
     pub entity_id: EntityId,
-    #[doc = " Upper bound on request timeout provided by the platform."]
+    /// Upper bound on request timeout provided by the platform.
     pub timeout_millis: u32,
-    #[doc = " The ID of the worker that sent the request."]
+    /// The ID of the worker that sent the request.
     pub caller_worker_id: String,
-    #[doc = " The attributes of the worker that sent the request."]
+    /// The attributes of the worker that sent the request.
     pub caller_attribute_set: WorkerAttributes,
-    #[doc = " The command request data. Deserialized with the corresponding vtable deserialize function and"]
-    #[doc = " freed with the vtable free function when the OpList is destroyed."]
+    /// The command request data. Deserialized with the corresponding vtable deserialize function and
+    /// freed with the vtable free function when the OpList is destroyed.
     pub request: Worker_CommandRequest,
 }
 
@@ -267,18 +267,18 @@ impl From<Worker_CommandRequestOp> for CommandRequestOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a CommandResponse operation."]
+/// Data for a CommandResponse operation.
 pub struct CommandResponseOp {
-    #[doc = " The ID of the command request for which there was a command response."]
+    /// The ID of the command request for which there was a command response.
     pub request_id: RequestId,
-    #[doc = " The ID of the entity originally targeted by the command request."]
+    /// The ID of the entity originally targeted by the command request.
     pub entity_id: EntityId,
-    #[doc = " Status code of the response, using StatusCode."]
+    /// Status code of the response, using StatusCode.
     pub status_code: StatusCode,
-    #[doc = " The error message."]
+    /// The error message.
     pub message: String,
-    #[doc = " The command response data. Deserialized with the corresponding vtable deserialize function and"]
-    #[doc = " freed with the vtable free function when the OpList is destroyed."]
+    /// The command response data. Deserialized with the corresponding vtable deserialize function and
+    /// freed with the vtable free function when the OpList is destroyed.
     pub response: Worker_CommandResponse,
 }
 
@@ -299,12 +299,12 @@ impl From<Worker_CommandResponseOp> for CommandResponseOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a ComponentUpdate operation."]
+/// Data for a ComponentUpdate operation.
 pub struct ComponentUpdateOp {
-    #[doc = " The ID of the entity for which there was a component update."]
+    /// The ID of the entity for which there was a component update.
     pub entity_id: EntityId,
-    #[doc = " The new component data for the updated entity. Deserialized with the corresponding vtable"]
-    #[doc = " deserialize function and freed with the vtable free function when the OpList is destroyed."]
+    /// The new component data for the updated entity. Deserialized with the corresponding vtable
+    /// deserialize function and freed with the vtable free function when the OpList is destroyed.
     pub update: Worker_ComponentUpdate,
 }
 
@@ -318,15 +318,15 @@ impl From<Worker_ComponentUpdateOp> for ComponentUpdateOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a CreateEntity operation."]
+/// Data for a CreateEntity operation.
 pub struct CreateEntityResponseOp {
-    #[doc = " The ID of the request for which there was a response."]
+    /// The ID of the request for which there was a response.
     pub request_id: RequestId,
-    #[doc = " Status code of the response, using Worker_StatusCode."]
+    /// Status code of the response, using Worker_StatusCode.
     pub status_code: StatusCode,
-    #[doc = " The error message."]
+    /// The error message.
     pub message: String,
-    #[doc = " If successful, the entity ID of the newly created entity."]
+    /// If successful, the entity ID of the newly created entity.
     pub entity_id: EntityId,
 }
 
@@ -346,9 +346,9 @@ impl From<Worker_CreateEntityResponseOp> for CreateEntityResponseOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a critical section boundary (enter or leave) operation."]
+/// Data for a critical section boundary (enter or leave) operation.
 pub struct CriticalSectionOp {
-    #[doc = " Whether the protocol is entering a critical section (true) or leaving it (false)."]
+    /// Whether the protocol is entering a critical section (true) or leaving it (false).
     pub in_critical_section: bool,
 }
 
@@ -365,15 +365,15 @@ impl From<Worker_CriticalSectionOp> for CriticalSectionOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a DeleteEntity operation."]
+/// Data for a DeleteEntity operation.
 pub struct DeleteEntityResponseOp {
-    #[doc = " The ID of the delete entity request for which there was a command response."]
+    /// The ID of the delete entity request for which there was a command response.
     pub request_id: RequestId,
-    #[doc = " The ID of the target entity of this request."]
+    /// The ID of the target entity of this request.
     pub entity_id: EntityId,
-    #[doc = " Status code of the response, using StatusCode."]
+    /// Status code of the response, using StatusCode.
     pub status_code: StatusCode,
-    #[doc = " The error message."]
+    /// The error message.
     pub message: String,
 }
 
@@ -393,20 +393,20 @@ impl From<Worker_DeleteEntityResponseOp> for DeleteEntityResponseOp {
 }
 
 #[derive(Debug)]
-#[doc = " A response indicating the result of an entity query request."]
+/// A response indicating the result of an entity query request.
 pub struct EntityQueryResponseOp {
-    #[doc = " The ID of the entity query request for which there was a response."]
+    /// The ID of the entity query request for which there was a response.
     pub request_id: RequestId,
-    #[doc = " Status code of the response, using StatusCode."]
+    /// Status code of the response, using StatusCode.
     pub status_code: StatusCode,
-    #[doc = " The error message."]
+    /// The error message.
     pub message: String,
-    #[doc = " Number of entities in the result set. Reused to indicate the result itself for CountResultType"]
-    #[doc = " queries."]
+    /// Number of entities in the result set. Reused to indicate the result itself for CountResultType
+    /// queries.
     pub result_count: u32,
-    #[doc = " Array of entities in the result set. Will be NULL if the query was a count query. Snapshot data"]
-    #[doc = " in the result is deserialized with the corresponding vtable deserialize function and freed with"]
-    #[doc = " the vtable free function when the OpList is destroyed."]
+    /// Array of entities in the result set. Will be NULL if the query was a count query. Snapshot data
+    /// in the result is deserialized with the corresponding vtable deserialize function and freed with
+    /// the vtable free function when the OpList is destroyed.
     pub results: Vec<Entity>,
 }
 
@@ -431,12 +431,12 @@ impl From<Worker_EntityQueryResponseOp> for EntityQueryResponseOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a FlagUpdate operation."]
+/// Data for a FlagUpdate operation.
 pub struct FlagUpdateOp {
-    #[doc = " The name of the updated worker flag."]
+    /// The name of the updated worker flag.
     pub name: String,
-    #[doc = " The new value of the updated worker flag."]
-    #[doc = " A None value indicates that the flag has been deleted."]
+    /// The new value of the updated worker flag.
+    /// A None value indicates that the flag has been deleted.
     pub value: Option<String>,
 }
 
@@ -462,7 +462,7 @@ impl From<Worker_FlagUpdateOp> for FlagUpdateOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a set of built-in metrics reported by the SDK."]
+/// Data for a set of built-in metrics reported by the SDK.
 pub struct MetricsOp {
     pub metrics: Metrics,
 }
@@ -476,11 +476,11 @@ impl From<Worker_MetricsOp> for MetricsOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a RemoveComponent operation."]
+/// Data for a RemoveComponent operation.
 pub struct RemoveComponentOp {
-    #[doc = " The ID of the entity for which a component was removed."]
+    /// The ID of the entity for which a component was removed.
     pub entity_id: EntityId,
-    #[doc = " The ID of the component that was removed."]
+    /// The ID of the component that was removed.
     pub component_id: ComponentId,
 }
 
@@ -494,9 +494,9 @@ impl From<Worker_RemoveComponentOp> for RemoveComponentOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a RemoveEntity operation."]
+/// Data for a RemoveEntity operation.
 pub struct RemoveEntityOp {
-    #[doc = " The ID of the entity that was removed from the worker's view of the simulation."]
+    /// The ID of the entity that was removed from the worker's view of the simulation.
     pub entity_id: EntityId,
 }
 
@@ -509,18 +509,18 @@ impl From<Worker_RemoveEntityOp> for RemoveEntityOp {
 }
 
 #[derive(Debug)]
-#[doc = " Data for a ReserveEntityIdsResponse operation."]
+/// Data for a ReserveEntityIdsResponse operation.
 pub struct ReserveEntityIdsResponseOp {
-    #[doc = " The ID of the reserve entity ID request for which there was a response."]
+    /// The ID of the reserve entity ID request for which there was a response.
     pub request_id: RequestId,
-    #[doc = " Status code of the response, using StatusCode."]
+    /// Status code of the response, using StatusCode.
     pub status_code: StatusCode,
-    #[doc = " The error message."]
+    /// The error message.
     pub message: String,
-    #[doc = " If successful, an ID which is the first in a contiguous range of newly allocated entity"]
-    #[doc = " IDs which are guaranteed to be unused in the current deployment."]
+    /// If successful, an ID which is the first in a contiguous range of newly allocated entity
+    /// IDs which are guaranteed to be unused in the current deployment.
     pub first_entity_id: EntityId,
-    #[doc = " If successful, the number of IDs reserved in the contiguous range, otherwise 0."]
+    /// If successful, the number of IDs reserved in the contiguous range, otherwise 0.
     pub number_of_entity_ids: u32,
 }
 

@@ -50,7 +50,7 @@ impl From<Worker_HistogramMetric> for HistogramMetric {
 }
 
 #[derive(Debug)]
-#[doc = " Parameters for a gauge metric."]
+/// Parameters for a gauge metric.
 pub struct GaugeMetric {
     pub key: String,
     pub value: f64,
@@ -70,17 +70,17 @@ impl From<Worker_GaugeMetric> for GaugeMetric {
 }
 
 #[derive(Debug)]
-#[doc = " Parameters for sending metrics to SpatialOS."]
+/// Parameters for sending metrics to SpatialOS.
 pub struct Metrics {
-    #[doc = " The load value of this worker. If NULL, do not report load."]
+    /// The load value of this worker. If NULL, do not report load.
     pub load: Option<f64>,
-    #[doc = " The number of gauge metrics."]
+    /// The number of gauge metrics.
     pub gauge_metric_count: u32,
-    #[doc = " Array of gauge metrics."]
+    /// Array of gauge metrics.
     pub gauge_metrics: Vec<GaugeMetric>,
-    #[doc = " The number of histogram metrics."]
+    /// The number of histogram metrics.
     pub histogram_metric_count: u32,
-    #[doc = " Array of histogram metrics."]
+    /// Array of histogram metrics.
     pub histogram_metrics: Vec<HistogramMetric>,
 }
 

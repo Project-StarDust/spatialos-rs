@@ -106,57 +106,57 @@ pub type ComponentUpdateSerialize = unsafe extern "C" fn(
 );
 
 pub struct ComponentVtable {
-    #[doc = " Component ID that this vtable is for. If this is the default vtable, this field is ignored."]
+    /// Component ID that this vtable is for. If this is the default vtable, this field is ignored.
     pub component_id: ComponentId,
-    #[doc = " User data which will be passed directly to the callbacks supplied below."]
+    /// User data which will be passed directly to the callbacks supplied below.
     pub user_data: *mut c_void,
-    #[doc = " The function pointers below are only necessary in order to use the user_handle fields present"]
-    #[doc = " in each of the Worker_CommandRequest, Worker_CommandResponse, Worker_ComponentData and"]
-    #[doc = " Worker_ComponentUpdate types, for the given component ID (or for all components without an"]
-    #[doc = " explicit vtable, if this is the default vtable), in order to offload serialization and"]
-    #[doc = " deserialization work to internal SDK threads."]
-    #[doc = ""]
-    #[doc = " For simplest usage of the SDK, all function pointers can be set to NULL, and only the"]
-    #[doc = " schema_type field should be used in each type."]
-    #[doc = ""]
-    #[doc = " In order to support usage of the user_handle field on instances of the corresponding type when"]
-    #[doc = " used as input data to the SDK, X_serialize() must be provided."]
-    #[doc = ""]
-    #[doc = " In order to support usage of the user_handle field on instances of the corresponding type when"]
-    #[doc = " received as output data to the SDK, X_deserialize() must be provided."]
-    #[doc = ""]
-    #[doc = " X_free() should free resources associated with the result of calling X_deserialize() or"]
-    #[doc = " X_copy() (if provided)."]
-    #[doc = ""]
-    #[doc = " This decision can be made on a per-component, per-handle-type, and per-direction (input or"]
-    #[doc = " output) basis. In the case of providing data to the SDK, the asynchronous serialization flow"]
-    #[doc = " can be disabled even on a per-call basis by providing a non-NULL schema_type pointer instead of"]
-    #[doc = " a user_handle pointer. The concrete types pointed to by the user_handle fields may differ"]
-    #[doc = " between components or between handle types."]
-    #[doc = ""]
-    #[doc = " All of the functions below, if provided, will be called from arbitrary internal SDK threads,"]
-    #[doc = " and therefore must be thread-safe. A single user_handle pointer will not be passed to multiple"]
-    #[doc = " callbacks concurrently, but a user_handle may be copied twice and the _results_ of those copies"]
-    #[doc = " may be used concurrently."]
-    #[doc = ""]
-    #[doc = " For a concrete example, consider calling Worker_Connection_SendComponentUpdate() with"]
-    #[doc = " short-circuiting enabled. The SDK will call component_update_copy() twice on the provided"]
-    #[doc = " user_handle. One copy will be used for the outgoing flow, and will be serialized with"]
-    #[doc = " component_update_serialize() and subsequently freed with component_update_free(). Concurrently,"]
-    #[doc = " the other copy will be passed back to the user as part of a Worker_OpList and freed with"]
-    #[doc = " component_update_free() when the OpList is deallocated (or, if its lifetime is extended with"]
-    #[doc = " Worker_AcquireComponentUpdate(), when the last reference is released by the user with"]
-    #[doc = " Worker_ReleaseComponentUpdate())."]
-    #[doc = ""]
-    #[doc = " In general, the two most obvious strategies are:"]
-    #[doc = " 1) reference-counting. Have X_copy() (atomically) increase a reference count and return the"]
-    #[doc = "    same pointer it was given, have X_free() (atomically) decrease the reference count and"]
-    #[doc = "    deallocate if zero. X_deserialize() should allocate a new object with reference count of 1,"]
-    #[doc = "    set the reference count of any new handle passed into the SDK to 1 initially and call"]
-    #[doc = "    X_free() manually afterwards. In this case, data owned by the user_handle should never be"]
-    #[doc = "    mutated after its first use. (This is the approach used internally for the schema_type.)"]
-    #[doc = " 2) deep-copying. Have X_copy() allocate an entirely new deep copy of the object, and X_free()"]
-    #[doc = "    deallocate directly. In this case, user_handles can be mutated freely."]
+    /// The function pointers below are only necessary in order to use the user_handle fields present
+    /// in each of the Worker_CommandRequest, Worker_CommandResponse, Worker_ComponentData and
+    /// Worker_ComponentUpdate types, for the given component ID (or for all components without an
+    /// explicit vtable, if this is the default vtable), in order to offload serialization and
+    /// deserialization work to internal SDK threads.
+    ///
+    /// For simplest usage of the SDK, all function pointers can be set to NULL, and only the
+    /// schema_type field should be used in each type.
+    ///
+    /// In order to support usage of the user_handle field on instances of the corresponding type when
+    /// used as input data to the SDK, X_serialize() must be provided.
+    ///
+    /// In order to support usage of the user_handle field on instances of the corresponding type when
+    /// received as output data to the SDK, X_deserialize() must be provided.
+    ///
+    /// X_free() should free resources associated with the result of calling X_deserialize() or
+    /// X_copy() (if provided).
+    ///
+    /// This decision can be made on a per-component, per-handle-type, and per-direction (input or
+    /// output) basis. In the case of providing data to the SDK, the asynchronous serialization flow
+    /// can be disabled even on a per-call basis by providing a non-NULL schema_type pointer instead of
+    /// a user_handle pointer. The concrete types pointed to by the user_handle fields may differ
+    /// between components or between handle types.
+    ///
+    /// All of the functions below, if provided, will be called from arbitrary internal SDK threads,
+    /// and therefore must be thread-safe. A single user_handle pointer will not be passed to multiple
+    /// callbacks concurrently, but a user_handle may be copied twice and the _results_ of those copies
+    /// may be used concurrently.
+    ///
+    /// For a concrete example, consider calling Worker_Connection_SendComponentUpdate() with
+    /// short-circuiting enabled. The SDK will call component_update_copy() twice on the provided
+    /// user_handle. One copy will be used for the outgoing flow, and will be serialized with
+    /// component_update_serialize() and subsequently freed with component_update_free(). Concurrently,
+    /// the other copy will be passed back to the user as part of a Worker_OpList and freed with
+    /// component_update_free() when the OpList is deallocated (or, if its lifetime is extended with
+    /// Worker_AcquireComponentUpdate(), when the last reference is released by the user with
+    /// Worker_ReleaseComponentUpdate()).
+    ///
+    /// In general, the two most obvious strategies are:
+    /// 1) reference-counting. Have X_copy() (atomically) increase a reference count and return the
+    ///    same pointer it was given, have X_free() (atomically) decrease the reference count and
+    ///    deallocate if zero. X_deserialize() should allocate a new object with reference count of 1,
+    ///    set the reference count of any new handle passed into the SDK to 1 initially and call
+    ///    X_free() manually afterwards. In this case, data owned by the user_handle should never be
+    ///    mutated after its first use. (This is the approach used internally for the schema_type.)
+    /// 2) deep-copying. Have X_copy() allocate an entirely new deep copy of the object, and X_free()
+    ///    deallocate directly. In this case, user_handles can be mutated freely.
     pub command_request_free: Option<CommandRequestFreeFn>,
     pub command_request_copy: Option<CommandRequestCopyFn>,
     pub command_request_deserialize: Option<CommandRequestDeserialize>,

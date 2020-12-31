@@ -24,8 +24,8 @@ pub type ComponentDataHandle = c_void;
 pub type ComponentUpdateHandle = c_void;
 
 #[derive(Debug)]
-#[doc = " Enum defining the severities of log messages that can be sent to SpatialOS and received from the"]
-#[doc = " SDK."]
+/// Enum defining the severities of log messages that can be sent to SpatialOS and received from the
+/// SDK.
 pub enum LogLevel {
     Debug,
     Info,
@@ -72,7 +72,7 @@ impl From<LogLevel> for u8 {
 }
 
 #[derive(Debug)]
-#[doc = " Enum defining the possible authority states for an entity component."]
+/// Enum defining the possible authority states for an entity component.
 pub enum Authority {
     NotAuthoritative,
     Authoritative,
@@ -98,37 +98,37 @@ impl From<u8> for Authority {
 }
 
 #[derive(Debug)]
-#[doc = " Enum defining possible command status codes."]
+/// Enum defining possible command status codes.
 pub enum StatusCode {
-    #[doc = " The request was successfully executed and returned a response."]
+    /// The request was successfully executed and returned a response.
     Success,
-    #[doc = " The request timed out before a response was received. It can be retried, but carefully - this"]
-    #[doc = " usually means the deployment is overloaded, so some sort of backoff should be used to avoid"]
-    #[doc = " making the problem worse. This can also be caused by the target worker's handling code failing"]
-    #[doc = " to respond to the command at all, perhaps due to a bug in its implementation."]
+    /// The request timed out before a response was received. It can be retried, but carefully - this
+    /// usually means the deployment is overloaded, so some sort of backoff should be used to avoid
+    /// making the problem worse. This can also be caused by the target worker's handling code failing
+    /// to respond to the command at all, perhaps due to a bug in its implementation.
     Timeout,
-    #[doc = " The target entity did not exist, or did not have the target component. This probably means the"]
-    #[doc = " entity either hasn't been created yet or has already been deleted. It might make sense to retry"]
-    #[doc = " the request if there is reason to believe the entity hasn't yet been created but will be soon."]
+    /// The target entity did not exist, or did not have the target component. This probably means the
+    /// entity either hasn't been created yet or has already been deleted. It might make sense to retry
+    /// the request if there is reason to believe the entity hasn't yet been created but will be soon.
     NotFound,
-    #[doc = " The request could not be executed by a worker, either because the worker lost authority over"]
-    #[doc = " the entity while handling the request, the entity was deleted while handling the request, or no"]
-    #[doc = " worker was authoritative over the entity at all. Assuming the deployment isn't irrecoverably"]
-    #[doc = " broken (e.g. due to misconfigured loadbalancing or crash-looping workers) this is a transient"]
-    #[doc = " failure and can be retried immediately."]
+    /// The request could not be executed by a worker, either because the worker lost authority over
+    /// the entity while handling the request, the entity was deleted while handling the request, or no
+    /// worker was authoritative over the entity at all. Assuming the deployment isn't irrecoverably
+    /// broken (e.g. due to misconfigured loadbalancing or crash-looping workers) this is a transient
+    /// failure and can be retried immediately.
     AuthorityLost,
-    #[doc = " The worker did not have the required permissions to make the request. Permissions do not change"]
-    #[doc = " at runtime, so it doesn't make sense to retry the request."]
+    /// The worker did not have the required permissions to make the request. Permissions do not change
+    /// at runtime, so it doesn't make sense to retry the request.
     PermissionDenied,
-    #[doc = " The command was delivered successfully, but the handler rejected it. Either the command was"]
-    #[doc = " delivered to a worker that explicitly rejected it by calling"]
-    #[doc = " Worker_Connection_SendCommandFailure, or the request data was rejected as invalid by SpatialOS"]
-    #[doc = " itself. In the latter case, in particular, Worker_Connection_SendCreateEntityRequest will"]
-    #[doc = " return kApplicationError if an entity ID reservation has expired, and"]
-    #[doc = " Worker_Connection_SendEntityQueryResult will return kApplicationError if the result set is"]
-    #[doc = " incomplete."]
+    /// The command was delivered successfully, but the handler rejected it. Either the command was
+    /// delivered to a worker that explicitly rejected it by calling
+    /// Worker_Connection_SendCommandFailure, or the request data was rejected as invalid by SpatialOS
+    /// itself. In the latter case, in particular, Worker_Connection_SendCreateEntityRequest will
+    /// return kApplicationError if an entity ID reservation has expired, and
+    /// Worker_Connection_SendEntityQueryResult will return kApplicationError if the result set is
+    /// incomplete.
     ApplicationError,
-    #[doc = " Some other error occurred. This likely indicates a bug in SpatialOS and should be reported."]
+    /// Some other error occurred. This likely indicates a bug in SpatialOS and should be reported.
     InternalError,
 }
 
@@ -153,39 +153,39 @@ impl From<u8> for StatusCode {
 }
 
 #[derive(Debug)]
-#[doc = " Possible status codes for a remote call, connection attempt, or connection migration attempt."]
+/// Possible status codes for a remote call, connection attempt, or connection migration attempt.
 pub enum ConnectionStatusCode {
-    #[doc = " The remote call was successful, or we are successfully connected."]
+    /// The remote call was successful, or we are successfully connected.
     Success,
-    #[doc = " Protocol violation, or some part of the system otherwise behaved in an unexpected way. Not"]
-    #[doc = " expected to occur in normal operation."]
+    /// Protocol violation, or some part of the system otherwise behaved in an unexpected way. Not
+    /// expected to occur in normal operation.
     InternalError,
-    #[doc = " An argument provided by the caller was determined to be invalid. This is a local failure; no"]
-    #[doc = " actual attempt was made to contact the host. Not retryable."]
+    /// An argument provided by the caller was determined to be invalid. This is a local failure; no
+    /// actual attempt was made to contact the host. Not retryable.
     InvalidArgument,
-    #[doc = " Failed due to a networking issue or otherwise unreachable host."]
+    /// Failed due to a networking issue or otherwise unreachable host.
     NetworkError,
-    #[doc = " A timeout provided by the caller or enforced by the system was exceeded. Can be retried."]
+    /// A timeout provided by the caller or enforced by the system was exceeded. Can be retried.
     Timeout,
-    #[doc = " Attempt was cancelled by the caller. Currently shouldn't happen; reserved for future use."]
+    /// Attempt was cancelled by the caller. Currently shouldn't happen; reserved for future use.
     Cancelled,
-    #[doc = " Made contact with the host, but the request was explicitly rejected. Unlikely to be retryable."]
-    #[doc = " Possible causes include: the request was made to the wrong host; the host considered the"]
-    #[doc = " request invalid for some other reason."]
+    /// Made contact with the host, but the request was explicitly rejected. Unlikely to be retryable.
+    /// Possible causes include: the request was made to the wrong host; the host considered the
+    /// request invalid for some other reason.
     Rejected,
-    #[doc = " The player identity token provided by the caller has expired. Generate a new one and retry."]
+    /// The player identity token provided by the caller has expired. Generate a new one and retry.
     PlayerIdentityTokenExpired,
-    #[doc = " The login token provided by the caller has expired. Generate a new one and retry."]
+    /// The login token provided by the caller has expired. Generate a new one and retry.
     LoginTokenExpired,
-    #[doc = " Failed because the deployment associated with the provided login token was at capacity."]
-    #[doc = " Retryable."]
+    /// Failed because the deployment associated with the provided login token was at capacity.
+    /// Retryable.
     CapacityExceeded,
-    #[doc = " Failed due to rate-limiting of new connections to the deployment associated with the provided"]
-    #[doc = " login token. Retryable."]
+    /// Failed due to rate-limiting of new connections to the deployment associated with the provided
+    /// login token. Retryable.
     RateExceeded,
-    #[doc = " After a successful connection attempt, the server later explicitly terminated the connection."]
-    #[doc = " Possible causes include: the deployment was stopped; the worker was killed due to"]
-    #[doc = " unresponsiveness."]
+    /// After a successful connection attempt, the server later explicitly terminated the connection.
+    /// Possible causes include: the deployment was stopped; the worker was killed due to
+    /// unresponsiveness.
     ServerShutdown,
 }
 
@@ -217,11 +217,11 @@ impl From<u8> for ConnectionStatusCode {
 }
 
 #[derive(Debug)]
-#[doc = " Worker attributes that are part of a worker's runtime configuration."]
+/// Worker attributes that are part of a worker's runtime configuration.
 pub struct WorkerAttributes {
-    #[doc = " Number of worker attributes."]
+    /// Number of worker attributes.
     pub attribute_count: u32,
-    #[doc = " Will be empty if there are no attributes associated with the worker."]
+    /// Will be empty if there are no attributes associated with the worker.
     pub attributes: Vec<String>,
 }
 
@@ -293,15 +293,15 @@ impl From<ResultType> for u8 {
     }
 }
 
-#[doc = " An entity query."]
+/// An entity query.
 pub struct EntityQuery {
-    #[doc = " The constraint for this query."]
+    /// The constraint for this query.
     pub constraint: Constraint,
-    #[doc = " Result type for this query, using Worker_ResultType."]
+    /// Result type for this query, using Worker_ResultType.
     pub result_type: ResultType,
-    #[doc = " Number of component IDs in the array for a snapshot result type."]
+    /// Number of component IDs in the array for a snapshot result type.
     pub snapshot_result_type_component_id_count: u32,
-    #[doc = " Pointer to component ID data for a snapshot result type. None means all component IDs."]
+    /// Pointer to component ID data for a snapshot result type. None means all component IDs.
     pub snapshot_result_type_component_ids: Vec<ComponentId>,
 }
 
@@ -357,14 +357,14 @@ impl From<EntityQuery> for Worker_EntityQuery {
     }
 }
 
-#[doc = " Represents an entity with an ID and a component data snapshot."]
+/// Represents an entity with an ID and a component data snapshot.
 #[derive(Debug, Clone)]
 pub struct Entity {
-    #[doc = " The ID of the entity."]
+    /// The ID of the entity.
     pub entity_id: Worker_EntityId,
-    #[doc = " Number of components for the entity."]
+    /// Number of components for the entity.
     pub component_count: u32,
-    #[doc = " Array of initial component data for the entity."]
+    /// Array of initial component data for the entity.
     pub components: Vec<ComponentData>,
 }
 
@@ -382,8 +382,8 @@ impl From<Worker_Entity> for Entity {
     }
 }
 
-#[doc = " An object used to represent a component data snapshot by either raw schema data or some"]
-#[doc = " user-defined handle type."]
+/// An object used to represent a component data snapshot by either raw schema data or some
+/// user-defined handle type.
 #[derive(Debug, Clone)]
 pub struct ComponentData {
     pub reserved: *mut c_void,
