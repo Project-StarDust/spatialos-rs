@@ -1,4 +1,4 @@
-use spatialos_sys::*;
+use spatialos_sys::{Schema_GetDoubleList, Schema_GetUint32List, Schema_GetEnumList, Schema_Object};
 
 use super::Object;
 use crate::schema::FieldId;
