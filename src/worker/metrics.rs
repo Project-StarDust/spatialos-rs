@@ -2,9 +2,9 @@ use spatialos_sys::{
     Worker_GaugeMetric, Worker_HistogramMetric, Worker_HistogramMetricBucket, Worker_Metrics,
 };
 
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 
-use crate::{const_to_vector, vector_to_owned_array};
+use crate::{const_to_string, const_to_vector, vector_to_owned_array};
 
 #[derive(Debug)]
 pub struct HistogramMetricBucket {
@@ -39,11 +39,7 @@ pub struct HistogramMetric {
 
 impl From<Worker_HistogramMetric> for HistogramMetric {
     fn from(metric: Worker_HistogramMetric) -> Self {
-        let key = unsafe { CStr::from_ptr(metric.key) }
-            .to_str()
-            .map(|s| s.to_owned())
-            .unwrap();
-
+        let key = const_to_string(metric.key);
         let buckets = const_to_vector::<Worker_HistogramMetricBucket>(
             metric.buckets,
             metric.bucket_count as isize,
@@ -84,10 +80,7 @@ pub struct GaugeMetric {
 
 impl From<Worker_GaugeMetric> for GaugeMetric {
     fn from(metric: Worker_GaugeMetric) -> Self {
-        let key = unsafe { CStr::from_ptr(metric.key) }
-            .to_str()
-            .map(|s| s.to_owned())
-            .unwrap();
+        let key = const_to_string(metric.key);
         Self {
             value: metric.value,
             key,

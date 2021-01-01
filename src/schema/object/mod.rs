@@ -1,4 +1,6 @@
-use spatialos_sys::{Schema_AllocateBuffer, Schema_GetBytesLength, Schema_Object};
+use spatialos_sys::{
+    Schema_AllocateBuffer, Schema_Clear, Schema_ClearField, Schema_GetBytesLength, Schema_Object,
+};
 
 use crate::schema::FieldId;
 use bytevec::ByteEncodable;
@@ -46,5 +48,12 @@ impl Object {
     }
     pub fn get_bytes_length(&self, field_id: FieldId) -> u32 {
         unsafe { Schema_GetBytesLength(&*self.inner as *const Schema_Object, field_id) }
+    }
+    pub fn clear(&mut self) {
+        unsafe { Schema_Clear(&mut *self.inner as *mut Schema_Object) }
+    }
+
+    pub fn clear_field(&mut self, field_id: FieldId) {
+        unsafe { Schema_ClearField(&mut *self.inner as *mut Schema_Object, field_id) }
     }
 }

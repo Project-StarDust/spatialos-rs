@@ -1,8 +1,9 @@
 use spatialos_sys::{
-    Worker_Authority, Worker_CommandIndex, Worker_CommandRequestHandle,
-    Worker_CommandResponseHandle, Worker_ComponentData, Worker_ComponentDataHandle,
-    Worker_ComponentId, Worker_ConnectionStatusCode, Worker_Entity, Worker_EntityId,
-    Worker_EntityQuery, Worker_LogLevel, Worker_RequestId, Worker_ResultType, Worker_StatusCode,
+    Worker_ApiVersion, Worker_ApiVersionStr, Worker_Authority, Worker_CommandIndex,
+    Worker_CommandRequestHandle, Worker_CommandResponseHandle, Worker_ComponentData,
+    Worker_ComponentDataHandle, Worker_ComponentId, Worker_ComponentUpdateHandle,
+    Worker_ConnectionStatusCode, Worker_Entity, Worker_EntityId, Worker_EntityQuery,
+    Worker_LogLevel, Worker_RequestId, Worker_ResultType, Worker_StatusCode,
     Worker_WorkerAttributes,
 };
 
@@ -13,7 +14,7 @@ pub mod log_message;
 pub mod metrics;
 pub mod op;
 
-use crate::worker::constraint::EntityIdConstraint;
+use crate::{const_to_string, worker::constraint::EntityIdConstraint};
 use crate::{const_to_vector, schema};
 use crate::{vector_to_owned_array, worker::constraint::Constraint};
 use std::ffi::CStr;
@@ -27,7 +28,15 @@ pub type CommandIndex = Worker_CommandIndex;
 pub type CommandRequestHandle = Worker_CommandRequestHandle;
 pub type CommandResponseHandle = Worker_CommandResponseHandle;
 pub type ComponentDataHandle = Worker_ComponentDataHandle;
-pub type ComponentUpdateHandle = c_void;
+pub type ComponentUpdateHandle = Worker_ComponentUpdateHandle;
+
+pub fn api_version() -> u32 {
+    unsafe { Worker_ApiVersion() }
+}
+
+pub fn api_version_str() -> String {
+    const_to_string(unsafe { Worker_ApiVersionStr() })
+}
 
 #[derive(Debug)]
 /// Enum defining the severities of log messages that can be sent to SpatialOS and received from the

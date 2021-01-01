@@ -1,14 +1,15 @@
 use spatialos_sys::{
     Schema_ComponentData, Schema_ComponentUpdate, Schema_CreateComponentData,
     Schema_CreateComponentUpdate, Schema_GetComponentDataFields, Schema_GetComponentUpdateFields,
-    SCHEMA_MAP_KEY_FIELD_ID, SCHEMA_MAP_VALUE_FIELD_ID,
+    SCHEMA_MAP_KEY_FIELD_ID, SCHEMA_MAP_VALUE_FIELD_ID, Schema_EntityId, Schema_FieldId, Schema_ComponentId
 };
 
 pub mod object;
 pub use object::Object;
 
-pub type EntityId = i64;
-pub type FieldId = u32;
+pub type EntityId = Schema_EntityId;
+pub type FieldId = Schema_FieldId;
+pub type ComponentId = Schema_ComponentId;
 
 pub const MAP_KEY_FIELD_ID: u32 = SCHEMA_MAP_KEY_FIELD_ID;
 pub const MAP_VALUE_FIELD_ID: u32 = SCHEMA_MAP_VALUE_FIELD_ID;

@@ -5,39 +5,32 @@ pub mod private_exports {
     pub use spatialos_sys::*;
 }
 
+use std::ffi::CStr;
+
+pub use spatialos_sys::{
+    Schema_AddComponentUpdateClearedField, Schema_GetComponentUpdateClearedFieldCount,
+    Schema_GetComponentUpdateClearedFieldList, Schema_IndexComponentUpdateClearedField,
+};
+
 pub use spatialos_sys::{
     Ngrpc_Buffer, Ngrpc_Call, Ngrpc_CallMetadata, Ngrpc_CallParameters, Ngrpc_Client, Ngrpc_Create,
     Ngrpc_Destroy, Ngrpc_DestroyCall, Ngrpc_FinishCall, Ngrpc_GetImprobableRootCertificate,
     Ngrpc_GetStatus, Ngrpc_MakeCall, Ngrpc_Parameters, Ngrpc_Receive, Ngrpc_Send, Ngrpc_Status,
-    Ngrpc_StatusCode, Ngrpc_StatusCodeToString, Ngrpc_TlsParameters, Schema_AddBoolList,
-    Schema_AddComponentUpdateClearedField, Schema_AddEntityIdList, Schema_AddFixed32List,
-    Schema_AddFixed64List, Schema_AddFloatList, Schema_AddInt32List, Schema_AddInt64List,
-    Schema_AddSfixed32List, Schema_AddSfixed64List, Schema_AddSint32List, Schema_AddSint64List,
-    Schema_AddUint64List, Schema_AllocateObject, Schema_ApplyComponentUpdateToData, Schema_Bundle,
-    Schema_Bundle_Destroy, Schema_Bundle_GetError, Schema_Bundle_Load, Schema_Clear,
-    Schema_ClearComponentUpdateClearedFields, Schema_ClearField, Schema_ComponentId,
+    Ngrpc_StatusCode, Ngrpc_StatusCodeToString, Ngrpc_TlsParameters, Schema_AllocateObject,
+    Schema_ApplyComponentUpdateToData, Schema_Bundle, Schema_Bundle_Destroy,
+    Schema_Bundle_GetError, Schema_Bundle_Load,
+    Schema_ClearComponentUpdateClearedFields,
     Schema_ConvertComponentDataIntoUpdate, Schema_CopyCommandRequest, Schema_CopyCommandResponse,
     Schema_CopyComponentData, Schema_CopyComponentUpdate, Schema_CopyGenericData,
     Schema_CreateCommandRequest, Schema_CreateCommandResponse, Schema_CreateGenericData,
     Schema_DestroyCommandRequest, Schema_DestroyCommandResponse, Schema_DestroyComponentData,
-    Schema_DestroyComponentUpdate, Schema_DestroyGenericData, Schema_EntityId,
-    Schema_ErrorCallback, Schema_FieldId, Schema_GenericData, Schema_GetBoolList,
-    Schema_GetCommandRequestObject, Schema_GetCommandResponseObject,
-    Schema_GetComponentUpdateClearedFieldCount, Schema_GetComponentUpdateClearedFieldList,
-    Schema_GetComponentUpdateEvents, Schema_GetComponentUpdateFields, Schema_GetEntityIdCount,
-    Schema_GetEntityIdList, Schema_GetError, Schema_GetFixed32Count, Schema_GetFixed32List,
-    Schema_GetFixed64Count, Schema_GetFixed64List, Schema_GetFloatList,
-    Schema_GetGenericDataObject, Schema_GetInt32Count, Schema_GetInt32List, Schema_GetInt64List,
-    Schema_GetSfixed32Count, Schema_GetSfixed32List, Schema_GetSfixed64Count,
-    Schema_GetSfixed64List, Schema_GetSint32Count, Schema_GetSint32List, Schema_GetSint64Count,
-    Schema_GetSint64List, Schema_GetUint64Count, Schema_GetUint64List,
-    Schema_GetUniqueFieldIdCount, Schema_GetUniqueFieldIds, Schema_GetWriteBufferLength,
-    Schema_IndexBool, Schema_IndexComponentUpdateClearedField, Schema_IndexDouble,
-    Schema_IndexEntityId, Schema_IndexFixed32, Schema_IndexFixed64, Schema_IndexFloat,
-    Schema_IndexInt32, Schema_IndexInt64, Schema_IndexSfixed32, Schema_IndexSfixed64,
-    Schema_IndexSint32, Schema_IndexSint64, Schema_IndexUint32, Schema_IndexUint64,
-    Schema_IsComponentUpdateFieldCleared, Schema_Json, Schema_JsonParameters, Schema_Json_Destroy,
-    Schema_Json_DumpCommandRequest, Schema_Json_DumpCommandResponse, Schema_Json_DumpComponentData,
+    Schema_DestroyComponentUpdate, Schema_DestroyGenericData, Schema_ErrorCallback,
+    Schema_GenericData, Schema_GetCommandRequestObject, Schema_GetCommandResponseObject,
+    Schema_GetComponentUpdateEvents, Schema_GetComponentUpdateFields, Schema_GetError,
+    Schema_GetGenericDataObject, Schema_GetUniqueFieldIdCount, Schema_GetUniqueFieldIds,
+    Schema_GetWriteBufferLength, Schema_IsComponentUpdateFieldCleared, Schema_Json,
+    Schema_JsonParameters, Schema_Json_Destroy, Schema_Json_DumpCommandRequest,
+    Schema_Json_DumpCommandResponse, Schema_Json_DumpComponentData,
     Schema_Json_DumpComponentUpdate, Schema_Json_DumpObject, Schema_Json_GetJsonString,
     Schema_Json_GetLastError, Schema_Json_GetLastWarning, Schema_Json_LoadCommandRequest,
     Schema_Json_LoadCommandResponse, Schema_Json_LoadComponentData,
@@ -55,14 +48,8 @@ pub use spatialos_sys::{
     Worker_Alpha_PlayerIdentityTokenResponseFuture,
     Worker_Alpha_PlayerIdentityTokenResponseFuture_Destroy,
     Worker_Alpha_PlayerIdentityTokenResponseFuture_Get, Worker_Alpha_SetAllocator,
-    Worker_ApiVersion, Worker_ApiVersionStr, Worker_CommandParameters, Worker_CommandRequest,
-    Worker_CommandRequestCopy, Worker_CommandRequestDeserialize, Worker_CommandRequestFree,
-    Worker_CommandRequestOp, Worker_CommandRequestSerialize, Worker_CommandResponse,
-    Worker_CommandResponseCopy, Worker_CommandResponseDeserialize, Worker_CommandResponseFree,
-    Worker_CommandResponseSerialize, Worker_ComponentDataCopy, Worker_ComponentDataDeserialize,
-    Worker_ComponentDataFree, Worker_ComponentDataSerialize, Worker_ComponentUpdate,
-    Worker_ComponentUpdateCopy, Worker_ComponentUpdateDeserialize, Worker_ComponentUpdateFree,
-    Worker_ComponentUpdateHandle, Worker_ComponentUpdateLoopback, Worker_ComponentUpdateSerialize,
+    Worker_CommandParameters, Worker_CommandRequest, Worker_CommandRequestOp,
+    Worker_CommandResponse, Worker_ComponentUpdate, Worker_ComponentUpdateLoopback,
     Worker_CompressionParameters, Worker_ConnectionFuture, Worker_ConnectionStatus,
     Worker_Connection_Alpha_Flush, Worker_Connection_DisableLogging,
     Worker_Connection_EnableLogging, Worker_Connection_GetConnectionStatusCode,
@@ -85,19 +72,18 @@ pub use spatialos_sys::{
     Worker_LogCallback, Worker_LogCallbackParameters, Worker_LogCategory, Worker_LogData,
     Worker_LogFilterCallback, Worker_LogFilterParameters, Worker_LoginTokenCredentials,
     Worker_LogsinkParameters, Worker_LogsinkType, Worker_ModularTcpNetworkParameters,
-    Worker_Op_Union, Worker_PlayerIdentityCredentials, Worker_ProtocolLoggingParameters,
-    Worker_QueueStatus, Worker_QueueStatusCallback, Worker_RakNetNetworkParameters,
-    Worker_ReleaseCommandRequest, Worker_ReleaseCommandResponse, Worker_ReleaseComponentData,
-    Worker_ReleaseComponentUpdate, Worker_Result, Worker_RotatingLogFileParameters,
-    Worker_SnapshotInputStream, Worker_SnapshotInputStream_Create,
-    Worker_SnapshotInputStream_Destroy, Worker_SnapshotInputStream_GetState,
-    Worker_SnapshotInputStream_HasNext, Worker_SnapshotInputStream_ReadEntity,
-    Worker_SnapshotOutputStream, Worker_SnapshotOutputStream_Create,
-    Worker_SnapshotOutputStream_Destroy, Worker_SnapshotOutputStream_GetLastWarning,
-    Worker_SnapshotOutputStream_GetState, Worker_SnapshotOutputStream_WriteEntity,
-    Worker_SnapshotParameters, Worker_SnapshotState, Worker_SnapshotType, Worker_SteamCredentials,
-    Worker_StreamState, Worker_TcpNetworkParameters, Worker_TcpTransportParameters,
-    Worker_ThreadAffinityParameters, Worker_UpdateParameters,
+    Worker_PlayerIdentityCredentials, Worker_ProtocolLoggingParameters, Worker_QueueStatus,
+    Worker_QueueStatusCallback, Worker_RakNetNetworkParameters, Worker_ReleaseCommandRequest,
+    Worker_ReleaseCommandResponse, Worker_ReleaseComponentData, Worker_ReleaseComponentUpdate,
+    Worker_Result, Worker_RotatingLogFileParameters, Worker_SnapshotInputStream,
+    Worker_SnapshotInputStream_Create, Worker_SnapshotInputStream_Destroy,
+    Worker_SnapshotInputStream_GetState, Worker_SnapshotInputStream_HasNext,
+    Worker_SnapshotInputStream_ReadEntity, Worker_SnapshotOutputStream,
+    Worker_SnapshotOutputStream_Create, Worker_SnapshotOutputStream_Destroy,
+    Worker_SnapshotOutputStream_GetLastWarning, Worker_SnapshotOutputStream_GetState,
+    Worker_SnapshotOutputStream_WriteEntity, Worker_SnapshotParameters, Worker_SnapshotState,
+    Worker_SnapshotType, Worker_SteamCredentials, Worker_StreamState, Worker_TcpNetworkParameters,
+    Worker_TcpTransportParameters, Worker_ThreadAffinityParameters, Worker_UpdateParameters,
 };
 
 #[allow(dead_code)]
@@ -140,4 +126,11 @@ pub(crate) fn const_to_vector<T: Clone>(data: *const T, size: isize) -> Vec<T> {
         }
         datas
     }
+}
+
+pub(crate) fn const_to_string(data: *const i8) -> String {
+    unsafe { CStr::from_ptr(data) }
+        .to_str()
+        .map(|s| s.to_owned())
+        .unwrap()
 }
