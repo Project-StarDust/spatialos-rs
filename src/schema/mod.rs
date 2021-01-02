@@ -1,7 +1,7 @@
 use spatialos_sys::{
-    Schema_ComponentData, Schema_ComponentUpdate, Schema_CreateComponentData,
-    Schema_CreateComponentUpdate, Schema_GetComponentDataFields, Schema_GetComponentUpdateFields,
-    SCHEMA_MAP_KEY_FIELD_ID, SCHEMA_MAP_VALUE_FIELD_ID, Schema_EntityId, Schema_FieldId, Schema_ComponentId
+    Schema_ComponentId, Schema_CreateComponentData, Schema_CreateComponentUpdate, Schema_EntityId,
+    Schema_FieldId, Schema_GetComponentDataFields, Schema_GetComponentUpdateFields,
+    SCHEMA_MAP_KEY_FIELD_ID, SCHEMA_MAP_VALUE_FIELD_ID,
 };
 
 pub mod object;
@@ -11,17 +11,29 @@ pub type EntityId = Schema_EntityId;
 pub type FieldId = Schema_FieldId;
 pub type ComponentId = Schema_ComponentId;
 
+pub mod ffi {
+
+    use ::spatialos_sys::{
+        Schema_CommandRequest, Schema_CommandResponse, Schema_ComponentData, Schema_ComponentUpdate,
+    };
+
+    pub type CommandRequest = Schema_CommandRequest;
+    pub type CommandResponse = Schema_CommandResponse;
+    pub type ComponentData = Schema_ComponentData;
+    pub type ComponentUpdate = Schema_ComponentUpdate;
+}
+
 pub const MAP_KEY_FIELD_ID: u32 = SCHEMA_MAP_KEY_FIELD_ID;
 pub const MAP_VALUE_FIELD_ID: u32 = SCHEMA_MAP_VALUE_FIELD_ID;
 
 #[derive(Debug, Clone)]
 pub struct ComponentData {
-    inner: Box<Schema_ComponentData>,
+    inner: Box<ffi::ComponentData>,
 }
 
 #[derive(Debug, Clone)]
 pub struct ComponentUpdate {
-    inner: Box<Schema_ComponentUpdate>,
+    inner: Box<ffi::ComponentUpdate>,
 }
 
 impl ComponentData {
@@ -32,7 +44,7 @@ impl ComponentData {
 
     pub fn get_fields(&mut self) -> Object {
         Object::from(unsafe {
-            Schema_GetComponentDataFields(&mut *self.inner as *mut Schema_ComponentData)
+            Schema_GetComponentDataFields(&mut *self.inner as *mut ffi::ComponentData)
         })
     }
 }
@@ -45,33 +57,33 @@ impl ComponentUpdate {
 
     pub fn get_fields(&mut self) -> Object {
         Object::from(unsafe {
-            Schema_GetComponentUpdateFields(&mut *self.inner as *mut Schema_ComponentUpdate)
+            Schema_GetComponentUpdateFields(&mut *self.inner as *mut ffi::ComponentUpdate)
         })
     }
 }
 
-impl From<*mut Schema_ComponentData> for ComponentData {
-    fn from(inner: *mut Schema_ComponentData) -> Self {
+impl From<*mut ffi::ComponentData> for ComponentData {
+    fn from(inner: *mut ffi::ComponentData) -> Self {
         let inner = unsafe { Box::from_raw(inner) };
         Self { inner }
     }
 }
 
-impl From<ComponentData> for *mut Schema_ComponentData {
+impl From<ComponentData> for *mut ffi::ComponentData {
     fn from(data: ComponentData) -> Self {
         Box::into_raw(data.inner)
     }
 }
 
-impl From<*mut Schema_ComponentUpdate> for ComponentUpdate {
-    fn from(inner: *mut Schema_ComponentUpdate) -> Self {
+impl From<*mut ffi::ComponentUpdate> for ComponentUpdate {
+    fn from(inner: *mut ffi::ComponentUpdate) -> Self {
         let inner = unsafe { Box::from_raw(inner) };
         Self { inner }
     }
 }
 
-impl Into<*mut Schema_ComponentUpdate> for ComponentUpdate {
-    fn into(self) -> *mut Schema_ComponentUpdate {
+impl Into<*mut ffi::ComponentUpdate> for ComponentUpdate {
+    fn into(self) -> *mut ffi::ComponentUpdate {
         Box::into_raw(self.inner)
     }
 }
